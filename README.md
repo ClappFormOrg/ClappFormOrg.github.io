@@ -11,13 +11,16 @@ The top layer of the query editor consists of the stages together forming the pi
 *	kpis
 # Left join
 This type is intended for joining data from a collection within the same app. This would be used if the data necessary for a table is split up in 2 or more collections (i.e. employee and manager). Below are the possible options to pass to this stage.
+
 Name | Value
 --- | ---
 collection | Text
 how |	Text (inner or outer, defaults to inner)
 left_key |	Text (key in the previous stage)
 right_key |	Text (key of the selected collection)
+
 #### Example:
+
 ```json
 {
   "type": "left join",
@@ -29,10 +32,13 @@ right_key |	Text (key of the selected collection)
 ```
 # Show
 This type is used for selecting keys to pass to the next stage.
+
 Name | Value
 --- | ---
 columns	| Array (List containing names of the keys)
+
 #### Example:
+
 ```json
 {
   "type": "show",
@@ -42,16 +48,21 @@ columns	| Array (List containing names of the keys)
  
 # Limit
 This type will limit the amount of items passed down to the next stage.
+
 Name | Value
 ---|---
 amount |	Number
+
 # Order
 The order stage allows you to order all the items passed down on multiple fields. Therefore this stage contains a 'steps' field which is a list that allows for multiple keys to be declared. Every step in this list must contain the following keys:
+
 Name | Value
 ---|---
 field	| Text
 how	| Text (ASC or DESC, defaults to DESC)
+
 #### Example:
+
 ```json
 {
   "type": "order",
@@ -63,7 +74,9 @@ how	| Text (ASC or DESC, defaults to DESC)
 ```
 # Group
 In order to create calculated values over multiple items the group stage exists. In this stage the join keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down. 
+
 #### Example:
+
 ```json
 {
   "type": "group",
