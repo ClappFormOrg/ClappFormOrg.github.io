@@ -73,8 +73,29 @@ how	| Text (ASC or DESC, defaults to DESC)
 }
 ```
 # Group
-In order to create calculated values over multiple items the group stage exists. In this stage the join keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down. 
+In order to create calculated values over multiple items the group stage exists. In this stage the group keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down. 
 
+Name | Value
+---|---
+by | Text (Optional)
+fields | Object
+
+The field needs to get a name, type of calutation and the column on which to perform the calculation.
+The possible options for the type of fields include:
+
+ - sum 
+ - avg (Average/ median)
+ - min (Minimum)
+ - max (Maximum)
+ - sdp (Standard Deviation Population)
+ - sds (Standard Deviation Sample)
+ - first (First value)
+ - last (Last value)
+ - list 
+ - ulist (Unique List)
+ - count (Total values)
+ - ucount (Total of unique values)
+ 
 #### Example:
 
 ```json
