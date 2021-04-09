@@ -9,6 +9,39 @@ The top layer of the query editor consists of the stages together forming the pi
 *	group
 *	filters
 *	kpis
+
+#### A full example could be
+```json
+[
+  {
+    "filters": [
+      {
+        "regio": [
+          {
+            "type": "eq",
+            "value": "Nederland"
+          }
+        ]
+      }
+    ],
+    "type": "filters"
+  },
+  {
+    "steps": [
+      {
+        "field": "periode",
+        "how": "DESC"
+      }
+    ],
+    "type": "order"
+  },
+  {
+    "amount": 1,
+    "type": "limit"
+  }
+]
+```
+
 # Left join
 This type is intended for joining data from a collection within the same app. This would be used if the data necessary for a table is split up in 2 or more collections (i.e. employee and manager). Below are the possible options to pass to this stage.
 
@@ -77,7 +110,7 @@ In order to create calculated values over multiple items the group stage exists.
 
 Name | Value
 ---|---
-by | Text (Optional)
+by | List (Keys that together need to form a new unique item, Optional)
 fields | Object
 
 The field needs to get a name, type of calutation and the column on which to perform the calculation.
@@ -114,3 +147,5 @@ The possible options for the type of fields include:
   }
 }
 ```
+
+
