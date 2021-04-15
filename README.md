@@ -298,8 +298,8 @@ The different types of calculations are:
       "divide": [{
         "add": ["$price", {
           "abs": -10
-        }], 4]
-      }
+        }]
+      }, 4]
     }
   }
 }
