@@ -2,13 +2,14 @@
 The query editor is meant to create a pipeline that transforms data at the latest possible stage before presentation. This means it is intended for selecting only the data necessary for creating a widget. Some types have the query disabled as the widget doesn't need any input data. Only the developer needs rights to certain data in order to put it in the pipeline. The data will not be user specific and therefore not adhere to any set permissions.
 # Pipeline
 The top layer of the query editor consists of the stages together forming the pipeline. These stages can be used in any quantity and order, but caution is advised for the sake of time-to-live of the widget. At the start of the pipeline the data will be passed down of the collection selected in the form. The data for the last stage will be passed down to the widget and can then be configured in the widget configuration. The last stage will always be limited to 100 items maximum to guarantee performance. The stages can have multiple different types:
-*	left join
-*	show
-*	limit
-*	order
-*	group
-*	filters
-*	kpis
+*	`left join`
+*	`show`
+*	`limit`
+*	`order`
+*	`group`
+*	`filters`
+*	`calculation`
+*	`kpis`
 
 #### A full example could be
 ```json
@@ -42,7 +43,11 @@ The top layer of the query editor consists of the stages together forming the pi
 ]
 ```
 
-# Left join
+# Values
+If a value needs to be added to the query one may use the following types: string (text), number or value from a key. Text needs to be surrounded by double quotes and to select the value from a key the name needs to be proceeded by a $ sign. For example `"value": "$price"`.
+
+# Stage types
+## Left join
 This type is intended for joining data from a collection within the same app. This would be used if the data necessary for a table is split up in 2 or more collections (i.e. employee and manager). Below are the possible options to pass to this stage.
 
 Name | Value
@@ -63,7 +68,7 @@ right_key |	Text (key of the selected collection)
   "right_key": "adress"
 }
 ```
-# Show
+## Show
 This type is used for selecting keys to pass to the next stage.
 
 Name | Value
@@ -79,14 +84,14 @@ columns	| Array (List containing names of the keys)
 }
 ```
  
-# Limit
+## Limit
 This type will limit the amount of items passed down to the next stage.
 
 Name | Value
 ---|---
 amount |	Number
 
-# Order
+## Order
 The order stage allows you to order all the items passed down on multiple fields. Therefore this stage contains a 'steps' field which is a list that allows for multiple keys to be declared. Every step in this list must contain the following keys:
 
 Name | Value
@@ -105,7 +110,7 @@ how	| Text (ASC or DESC, defaults to DESC)
   }]
 }
 ```
-# Group
+## Group
 In order to create calculated values over multiple items the group stage exists. In this stage the group keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down. 
 
 Name | Value
@@ -115,19 +120,18 @@ fields | Object
 
 The field needs to get a name, type of calutation and the column on which to perform the calculation.
 The possible options for the type of fields include:
-
- - sum 
- - avg (Average/ median)
- - min (Minimum)
- - max (Maximum)
- - sdp (Standard Deviation Population)
- - sds (Standard Deviation Sample)
- - first (First value)
- - last (Last value)
- - list 
- - ulist (Unique List)
- - count (Total values)
- - ucount (Total of unique values)
+ * `sum`
+ * `avg` (Average/ median)
+ * `min` (Minimum)
+ * `max` (Maximum)
+ * `sdp` (Standard Deviation Population)
+ * `sds` (Standard Deviation Sample)
+ * `first` (First value)
+ * `last` (Last value)
+ * `list`
+ * `ulist` (Unique List)
+ * `count` (Total values)
+ * `ucount` (Total of unique values)
  
 #### Example:
 
@@ -136,16 +140,226 @@ The possible options for the type of fields include:
   "type": "group",
   "by": ["postcode"],
   "fields": { 
-      "ucount": {
+      "total_unique": {
           "type": "ucount",
           "column": "house_price"
       },
       "address": {
           "type": "first",
-          "column": "adress"
+          "column": "address"
       }
   }
 }
 ```
 
+## Filters
+The filters stage's intended purpose is to query the data and return all matching records. One can i.e. select only country specific data. There is support for AND statements and OR statements on multiple fields. Every expression needs to contain a `type` and `value`.
+
+Different types are:
+* `eq` (Equal to)
+* `ne` (Not equal to)
+* `lt` (Less than)
+* `lte` (Less than or equal to)
+* `gt` (Greater than)
+* `gte` (Greater than or equal to)
+
+#### Examples:
+##### Where region equals Nederland and price is greater than 1000
+```json
+{
+  "filters": [
+    {
+      "regio": [
+        {
+          "type": "eq",
+          "value": "Nederland"
+        }
+      ],
+      "price": [
+        { 
+          "type": "gt",
+          "value": 1000
+        }
+      ]
+    }
+  ],
+  "type": "filters"
+}
+```
+
+##### Where region equals Nederland or Duitsland and price is greater than 1000 
+```json
+{
+  "filters": [
+    {
+      "regio": [
+        {
+          "type": "eq",
+          "value": "Nederland"
+        }
+      ],
+      "price": [
+        { 
+          "type": "gt",
+          "value": 1000
+        }
+      ]
+    },
+    {
+      "regio": [
+        {
+          "type": "eq",
+          "value": "Duitsland"
+        }
+      ],
+      "price": [
+        { 
+          "type": "gt",
+          "value": 1000
+        }
+      ]
+     }
+  ],
+  "type": "filters"
+}
+```
+##### Where region equals Nederland and price is greater than 1000 and less than the market_value 
+```json
+{
+  "filters": [
+    {
+      "regio": [
+        {
+          "type": "eq",
+          "value": "Nederland"
+        }
+      ],
+      "price": [
+        { 
+          "type": "gt",
+          "value": 1000
+        },
+        { 
+          "type": "lt",
+          "value": "$market_value"
+        }
+      ]
+    }
+  ],
+  "type": "filters"
+}
+```
+
+## Calculation
+This stage has been created in order to be able to create new columns derived from existing columns. Usage could be appending text to text, doing basic calculations or creating categories for numerical records.
+
+The different types of calculations are:
+* `add`
+* `subtract`
+* `divide`
+* `multiply`
+* `abs`
+* `avg`
+* `ceil`
+* `concat`
+* `floor`
+* `log` (Usage: [num, base])
+* `ltrim`
+* `rtrim`
+* `trim`
+* `max`
+* `mod` (modulo)
+* `pow` (Usage: [num, power])
+* `round` (Usage: [num, decimals])
+* `sum`
+* `sd` (Standard Deviation)
+* `switch`
+
+#### Examples
+##### Single calculation (basic_calculation = $price * 2)
+```json
+{
+  "type": "calculation",
+  "fields": {
+    "basic_calculation": {
+      "multiply": ["$price", 2]
+      }
+    }
+  }
+}
+```
+
+##### Multilayered (multi_calculation = (price + abs(-10)) / 4)
+```json
+{
+  "type": "calculation",
+  "fields": {
+    "multi_calculation": {
+      "divide": [{
+        "add": ["$price", {
+          "abs": -10
+        }], 4]
+      }
+    }
+  }
+}
+```
+
+##### Switch statement
+```json
+{
+  "type": "calculation",
+  "fields": {
+    "segment": {
+      "switch": [
+        { 
+          "if": { 
+            "gte": ["$price", 1500]
+          },
+          "then": "Upper"
+        },
+        { 
+          "default": true,
+          "then": "Lower"
+        }
+      ]
+    }
+  }
+}
+```
+
+## Kpis
+In order to create calculated values over all the remaining records the kpis stage exists. In this stage the kpi keys must be declared. All keys not set here will not be passed down. 
+
+Name | Value
+---|---
+fields | Object
+
+The field needs to get a name, type of calutation and the column on which to perform the calculation.
+The possible options for the type of fields include:
+ * `sum`
+ * `avg` (Average/ median)
+ * `min` (Minimum)
+ * `max` (Maximum)
+ * `sdp` (Standard Deviation Population)
+ * `sds` (Standard Deviation Sample)
+ * `first` (First value)
+ * `last` (Last value)
+ * `list`
+ * `ulist` (Unique List)
+ * `count` (Total values)
+ * `ucount` (Total of unique values)
+ 
+#### Example:
+```json
+{
+  "type": "kpis",
+  "fields": { 
+      "total": {
+          "type": "count",
+          "column": "id"
+      }
+  }
+}
+```
 
