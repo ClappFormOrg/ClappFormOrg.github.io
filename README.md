@@ -97,7 +97,7 @@ fields	| Object(Where the key is the new name and the value is the old name)
 {
   "type": "rename",
   "fields": {
-    "new": old
+    "new": "old"
   }
 }
 ```
