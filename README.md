@@ -301,7 +301,6 @@ The different types of calculations are:
   "fields": {
     "basic_calculation": {
       "multiply": ["$price", 2]
-      }
     }
   }
 }
@@ -331,9 +330,9 @@ The different types of calculations are:
     "segment": {
       "switch": [
         { 
-          "if": { 
+          "if": [{ 
             "gte": ["$price", 1500]
-          },
+          }],
           "then": "Upper"
         },
         { 
