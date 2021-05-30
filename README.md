@@ -48,7 +48,7 @@ The top layer of the query editor consists of the stages together forming the pi
 If a value needs to be added to the query one may use the following types: string (text), number or value from a key. Text needs to be surrounded by double quotes and to select the value from a key the name needs to be proceeded by a $ sign. For example `"value": "$price"`. 
 
 # Global Values
-At this time of writing there is one global variable that can be used in the query builder. `"$USER"` will be replaced with the id of the user in the database. This way you can maake dashboards user-specific.
+At this time of writing there is one global variable that can be used in the query builder. `"$USER"` will be replaced with the id of the user in the database. This way you can make dashboards user-specific.
 
 # Stage types
 ## Left join
