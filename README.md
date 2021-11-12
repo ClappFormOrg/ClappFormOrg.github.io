@@ -393,9 +393,7 @@ In several places of the widget configuration you have the possibility to provid
 
 #### Example:
 ```html
-{
-{templateData.key}
-}
+{{templateData.key}}
 ```
 It is also possible to parse in user data. The items which can be shown are:
  * `email`
