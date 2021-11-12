@@ -393,7 +393,11 @@ In several places of the widget configuration you have the possibility to provid
 
 #### Example:
 ```html
-\{{templateData.key\}}
+{% highlight html%}
+{% raw %}
+{{templateData.key}}
+{% endraw %}
+{% endhighlight %}
 ```
 
 
