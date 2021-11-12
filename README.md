@@ -392,9 +392,7 @@ To configure the relevant questionnaire for the user, you can write a query in o
 In several places of the widget configuration you have the possibility to provide your own text using a WYSIWYG. It is possible to parse in data from the query into your text. In every case only the first item of the query result is accessible. Let's say you want to parse in the address in your text, you need to do the following:
 
 #### Example:
-```html
-{{templateData.key}}
-```
+`{{templateData.key}}`
 It is also possible to parse in user data. The items which can be shown are:
  * `email`
  * `first_name` (Average/ median)
