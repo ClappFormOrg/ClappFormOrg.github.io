@@ -393,7 +393,7 @@ In several places of the widget configuration you have the possibility to provid
 
 #### Example:
 ```vue
-{{templateData.key}} dfhkgfhsghksdg
+{{templateData.key}}
 ```
 
 
