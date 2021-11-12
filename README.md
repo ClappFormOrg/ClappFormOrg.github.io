@@ -48,7 +48,9 @@ The top layer of the query editor consists of the stages together forming the pi
 If a value needs to be added to the query one may use the following types: string (text), number or value from a key. Text needs to be surrounded by double quotes and to select the value from a key the name needs to be proceeded by a $ sign. For example `"value": "$price"`. 
 
 # Global Values
-At this time of writing there is one global variable that can be used in the query builder. `"$USER"` will be replaced with the id of the user in the database. This way you can make dashboards user-specific.
+At this time of writing there are several global variables that can be used in the query builder. `"$USER"` will be replaced with the id of the user in the database. This way you can make dashboards user-specific. `"$DEEP_DIVE"` provide access to the values of a chart when you click on this specific chart. the key will be replaced with the actual value. For exmaple if the chart contains information regarding an address and you want to use this key value use: `"$DEEP_DIVE.address"`. The last global varaible is the `"$ID"`, using this the id in the url will be extracted and replaced in the database with this value. 
+
+
 
 # Stage types
 ## Left join
@@ -383,3 +385,24 @@ The possible options for the type of fields include:
 }
 ```
 
+## Questionnaire
+To configure the relevant questionnaire for the user, you can write a query in order determine which data will be loaded in the questionnaire. If you don't confiugure a query please be aware it will always parse in data if the collection has data. Making a questionnaire user specific, or other condition use the query options in order to fulfill your goal. 
+
+## Explanation
+In several places of the widget configuration you have the possibility to provide your own text using a WYSIWYG. It is possible to parse in data from the query into your text. In every case only the first item of the query result is accessible. Let's say you want to parse in the address in your text, you need to do the following:
+
+#### Example:
+```json
+{templateData.key}
+```
+It is also possible to parse in user data. The items which can be shown are:
+ * `email`
+ * `first_name` (Average/ median)
+ * `last_name` (Minimum)
+
+You can use this data in the WYSIWYG:
+
+#### Example:
+```json
+{user.key}
+```
