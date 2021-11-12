@@ -407,6 +407,8 @@ It is also possible to parse in user data. The items which can be shown are:
 You can use this data in the WYSIWYG:
 
 #### Example:
-```html
+{% highlight html%}
+{% raw %}
 {{user.key}}
-```
+{% endraw %}
+{% endhighlight %}
