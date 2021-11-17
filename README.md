@@ -412,3 +412,23 @@ You can use this data in the WYSIWYG:
 {{user.key}}
 {% endraw %}
 {% endhighlight %}
+
+## HTML (Data Table, Single Value, List)
+It is possible to customize the data table, single value widget and list overview. In order to accomplish this, you need to specify the HTML and CSS. The HTML follows the HTML and Vue JS directives. The css mist be specified by making a JSON setting. You need to configure both.
+
+#### Example (HTML):
+```html
+<div :style="css.testen">
+testeten
+</div>
+```
+
+#### Example (CCS):
+```json
+{
+  "testen": {
+    "color": "red",
+    "font-size": "40px"
+  }
+}
+```
