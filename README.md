@@ -414,7 +414,7 @@ You can use this data in the WYSIWYG:
 {% endhighlight %}
 
 ## HTML (Data Table, Single Value, List)
-It is possible to customize the data table, single value widget and list overview. In order to accomplish this, you need to specify the HTML and CSS. The HTML follows the HTML and Vue JS directives. The css mist be specified by making a JSON setting. You need to configure both.
+It is possible to customize the data table, single value widget and list overview. In order to accomplish this, you need to specify the HTML and CSS. The HTML follows the HTML and Vue JS directives. The css mist be specified by making a JSON setting. You need to configure both. If you want to use data from the query result it is possible. The data is stored inside an object. It can be accessed by using the data in your HTML
 
 #### Example (HTML):
 ```html
@@ -422,6 +422,13 @@ It is possible to customize the data table, single value widget and list overvie
 testeten
 </div>
 ```
+
+#### Example:
+{% highlight html%}
+{% raw %}
+{{data.key}}
+{% endraw %}
+{% endhighlight %}
 
 #### Example (CCS):
 ```json
