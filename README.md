@@ -11,6 +11,7 @@ The top layer of the query editor consists of the stages together forming the pi
 *	`filters`
 *	`calculation`
 *	`kpis`
+*	`Union with`
 
 #### A full example could be
 ```json
@@ -382,6 +383,21 @@ The possible options for the type of fields include:
           "column": "id"
       }
   }
+}
+```
+## Union With
+Performs a union of two collections; i.e. 'union with' combines results from two collections into a single result set. This could result in duplicates, to remove duplicates you can use the 'group' stage type.
+
+
+Name | Value
+---|---
+collection	| Text (Collection slug)
+ 
+#### Example:
+```json
+{
+  "type": "unionWith",
+  "collection": "feedback_resultaten"
 }
 ```
 
