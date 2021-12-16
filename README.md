@@ -385,8 +385,9 @@ The possible options for the type of fields include:
   }
 }
 ```
+
 ## Union With
-Performs a union of two collections; i.e. 'union with' combines results from two collections into a single result set. This could result in duplicates, to remove duplicates you can use the 'group' stage type.
+Performs a union of two collections; i.e. 'union with' combines results from two collections into a single result set. 
 
 
 Name | Value
@@ -399,6 +400,27 @@ collection	| Text (Collection slug)
   "type": "unionWith",
   "collection": "feedback_resultaten"
 }
+```
+This could result in duplicates, to remove duplicates you can use the 'group' stage type.
+
+#### Example:
+```json
+
+{
+  "type": "unionWith",
+  "collection": "collection1"
+},
+{
+"type": "group",
+"by": ["email"],
+"fields": {
+    "email": {
+        "type": "first",
+        "column": "email"
+    }
+  }
+}
+
 ```
 
 ## Questionnaire
