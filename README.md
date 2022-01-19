@@ -12,6 +12,10 @@ The top layer of the query editor consists of the stages together forming the pi
 *	`calculation`
 *	`kpis`
 *	`Union with`
+*	`unwind`
+*	`array to object`
+*	`object to array`
+*	`add field`
 
 #### A full example could be
 ```json
@@ -421,6 +425,22 @@ This could result in duplicates, to remove duplicates you can use the 'group' st
   }
 }
 
+```
+
+## Unwind
+Deconstructs an array field from the input documents to output a document for each element. Each output document is the input document with the value of the array field replaced by the element.
+
+
+Name | Value
+---|---
+fields	| Array (List containing names of the keys)
+ 
+#### Example:
+```json
+{
+  "type": "unwind",
+  "fields": ["feedback_resultaten"]
+}
 ```
 
 ## Questionnaire
