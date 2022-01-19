@@ -443,6 +443,60 @@ fields	| Array (List containing names of the keys)
 }
 ```
 
+## Array to object
+Converts an array into a single document;
+
+
+Name | Value
+---|---
+fields	| Object(Where the key is the new name and the value is the old name)
+ 
+#### Example:
+```json
+{
+  "type": "arrayToObject",
+  "fields": {
+    "new": "old"
+  }
+}
+```
+
+## Object to array
+Converts a object to an array. The return array contains an element for each field/value pair in the original document. 
+
+
+Name | Value
+---|---
+fields	| Object(Where the key is the new name and the value is the old name)
+ 
+#### Example:
+```json
+{
+  "type": "objectToArray",
+  "fields": {
+    "new": "old"
+  }
+}
+```
+
+## Add field
+Adds new fields to object. 
+
+
+Name | Value
+---|---
+fields	| Object(Where the key is the new name and the value is value you want to add )
+ 
+#### Example:
+```json
+{
+  "type": "addField",
+  "fields": {
+    "new": "value"
+  }
+}
+```
+
 ## Questionnaire
 To configure the relevant questionnaire for the user, you can write a query in order determine which data will be loaded in the questionnaire. If you don't confiugure a query please be aware it will always parse in data if the collection has data. Making a questionnaire user specific, or other condition use the query options in order to fulfill your goal. 
 
