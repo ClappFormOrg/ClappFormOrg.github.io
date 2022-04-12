@@ -18,6 +18,8 @@ The top layer of the query editor consists of the stages together forming the pi
 *	`array to object`
 *	`object to array`
 *	`add field`
+*	`toEpoch`
+*	`toDate`
 
 #### A full example could be
 ```json
@@ -590,8 +592,9 @@ column	| Text
 format	| Text (Optional)
 
 ### Format Specifiers
+
 Specifiers | Description | Possible Values
----|--- | ---
+---|---|---
 %d	| Day of Month (2 digits, zero padded) | 01-31
 %G	| Year in ISO 8601 format | 0000-9999
 %H	| Hour (2 digits, zero padded, 24-hour clock) | 00-23
