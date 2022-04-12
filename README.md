@@ -1,8 +1,10 @@
+
 # Query
 The query editor is meant to create a pipeline that transforms data at the latest possible stage before presentation. This means it is intended for selecting only the data necessary for creating a widget. Some types have the query disabled as the widget doesn't need any input data. Only the developer needs rights to certain data in order to put it in the pipeline. The data will not be user specific and therefore not adhere to any set permissions.
 # Pipeline
 The top layer of the query editor consists of the stages together forming the pipeline. These stages can be used in any quantity and order, but caution is advised for the sake of time-to-live of the widget. At the start of the pipeline the data will be passed down of the collection selected in the form. The data for the last stage will be passed down to the widget and can then be configured in the widget configuration. The last stage will always be limited to 100 items maximum to guarantee performance. The stages can have multiple different types:
 *	`left join`
+*	`convert`
 *	`show`
 *	`rename`
 *	`limit`
@@ -79,6 +81,73 @@ right_key |	Text (key of the selected collection)
   "right_key": "adress"
 }
 ```
+
+The "left join" stage also accepts "$USER_TABLE" as a collection value. When this identifier is used to system user replaces the specified left_key. The right_key must then specify whether the left_key is an ID (integer) or string For example, the following dataset:
+```json
+[{
+  "location": "work",
+  ...
+  "user_id": 1,
+  "user_email": "j.doe@clappform.com"
+}]
+```
+With this query:
+```json
+[{
+  "type": "left join",
+  "collection": "$USER_TABLE",
+  "left_key": "user_id", // alt: "left_key": "user_email"
+  "right_key": "id" // alt: "right_key": "email"
+}]
+```
+
+Returns:
+```json
+[{
+  "location": "work",
+  ...
+  "user_id": {
+    "name": "john",
+    "lastname": "doe",
+    "email": "j.doe@clappform.com"
+  },
+  "user_email": "j.doe@clappform.com"
+}]
+```
+
+## Convert
+Converts a value to a specified type.
+
+Name | Value
+--- | ---
+input | Text
+to |	Text
+onError |	Text (Optional)
+onNull |	Text (Optional)
+
+
+The 'to' argument can be any valid expression that resolves to one of the following string identifiers:
+*	`double`
+*	`string`
+*	`objectId`
+*	`bool`
+*	`date`
+*	`int`
+*	`long`
+*	`decimal`
+
+#### Example:
+
+```json
+{
+  "type": "convert",
+  "input": "timestamp",
+  "to": "string",
+  "onError": "na",
+  "onNull": "null"
+}
+```
+
 ## Show
 This type is used for selecting keys to pass to the next stage.
 
@@ -494,6 +563,55 @@ fields	| Object(Where the key is the new name and the value is value you want to
   "fields": {
     "new": "value"
   }
+}
+```
+
+
+## To Epoch
+Converts key to epoch timestamp. This stage expects a datestring as input and returns epoch timestamp.
+
+Name | Value
+---|---
+column	| Text
+ 
+#### Example:
+```json
+{
+  "type": "toEpoch",
+  "column": "datestring" 
+}
+```
+## To Date
+Inverse of toEpoch. Converts an integer timestamp to a data string. Additionally accepts format specifiers to modify the output date string, if 'format' is not specified the stage default is "%Y-%m-%d" which outputs as "2022-06-15".
+
+Name | Value
+---|---
+column	| Text
+format	| Text (Optional)
+
+### Format Specifiers
+Specifiers | Description | Possible Values
+---|--- | ---
+%d	| Day of Month (2 digits, zero padded) | 01-31
+%G	| Year in ISO 8601 format | 0000-9999
+%H	| Hour (2 digits, zero padded, 24-hour clock) | 00-23
+%L	| Millisecond (3 digits, zero padded) | 000-999
+%m	| Month (2 digits, zero padded) | 01-12
+%M	| Minute (2 digits, zero padded) | 01-31
+%S	| Second (2 digits, zero padded) | 00-60
+%u	| Day of week number in ISO 8601 format (1-Monday, 7-Sunday) | 1-7
+%v	| Week of Year in ISO 8601 format | 1-53
+%Y	| Year (4 digits, zero padded) | 0000-9999
+%z	| The timezone offset from UTC. | +/-[hh][mm]
+%Z	| The minutes offset from UTC as a number. For example, if the timezone offset (+/-[hhmm]) was +0445, the minutes offset is +285. | +/-mmm
+%%	| Percent Character as a Literal | %
+
+#### Example:
+```json
+{
+  "type": "toEpoch",
+  "column": "datestring",
+  "format": "%Y-%m-%d %H:%M:%S" // Outputs: 2022-06-15 11:06:52
 }
 ```
 
