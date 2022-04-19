@@ -584,12 +584,13 @@ column	| Text
 }
 ```
 ## To Date
-Inverse of toEpoch. Converts an integer timestamp to a data string. Additionally accepts format specifiers to modify the output date string, if 'format' is not specified the stage default is "%Y-%m-%d" which outputs as "2022-06-15".
+Inverse of toEpoch. Converts an integer timestamp to a data string. Additionally accepts format specifiers to modify the output date string, if 'format' is not specified the stage default is "%Y-%m-%d" which outputs as "2022-06-15". You can also specify the timezone, if 'timezone' is not specified the stage default is "Europe/Amsterdam".
 
 Name | Value
 ---|---
 column	| Text
 format	| Text (Optional)
+timezone	| Text (Optional)
 
 ### Format Specifiers
 
@@ -614,7 +615,8 @@ Specifiers | Description | Possible Values
 {
   "type": "toEpoch",
   "column": "datestring",
-  "format": "%Y-%m-%d %H:%M:%S" // Outputs: 2022-06-15 11:06:52
+  "format": "%Y-%m-%d %H:%M:%S", // Outputs: 2022-06-15 11:06:52
+  "timezone": "Europe/Amsterdam"
 }
 ```
 
