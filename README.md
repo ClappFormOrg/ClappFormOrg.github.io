@@ -621,7 +621,7 @@ Specifiers | Description | Possible Values
 #### Example:
 ```json
 {
-  "type": "toEpoch",
+  "type": "toDate",
   "column": "datestring",
   "format": "%Y-%m-%d %H:%M:%S", // Outputs: 2022-06-15 11:06:52
   "timezone": "Europe/Amsterdam"
