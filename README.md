@@ -191,22 +191,30 @@ Name | Value
 amount |	Number
 
 ## Order
-The order stage allows you to order all the items passed down on multiple fields. Therefore this stage contains a 'steps' field which is a list that allows for multiple keys to be declared. Every step in this list must contain the following keys:
+The order stage allows you to order all passed items on multiple fields. The fields object stores two arrays that contain the sorting methods. Each array contains a list of keys that the query will sort on. For example, if the query only needs to sort ascending by ID, then the stage will look like this:
+
+```json
+{
+  "type": "order",
+  "fields": {
+    "ASC": ["id"]
+  }
+}
+```
 
 Name | Value
 ---|---
-field	| Text
-how	| Text (ASC or DESC, defaults to DESC)
+fields	| Text (Object containing two arrays)
 
 #### Example:
 
 ```json
 {
   "type": "order",
-  "steps": [{
-      "field": "postcode",
-      "how": "DESC"
-  }]
+  "fields": {
+      "ASC": ["id", "province"],
+      "DESC": ["municipality"]
+  }
 }
 ```
 ## Group
