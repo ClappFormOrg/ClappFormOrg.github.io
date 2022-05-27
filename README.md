@@ -6,7 +6,7 @@ The query editor is meant to create a pipeline that transforms data at the lates
 The top layer of the query editor consists of the stages together forming the pipeline. These stages can be used in any quantity and order, but caution is advised for the sake of time-to-live of the widget. At the start of the pipeline the data will be passed down of the collection selected in the form. The data for the last stage will be passed down to the widget and can then be configured in the widget configuration. The last stage will always be limited to 100 items maximum to guarantee performance. The stages can have multiple different types:
 
 *	[`add field`](#add-field)
-*	[`array to object`](##array-to-object)
+*	[`array to object`](#array-to-object)
 *	[`bucket`](#bucket)
 *	[`calculation`](#calculation)
 *	[`convert`](#convert)
