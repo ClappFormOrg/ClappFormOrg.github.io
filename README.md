@@ -1,13 +1,16 @@
 
 # Query
+
 The query editor is meant to create a pipeline that transforms data at the latest possible stage before presentation. This means it is intended for selecting only the data necessary for creating a widget. Some types have the query disabled as the widget doesn't need any input data. Only the developer needs rights to certain data in order to put it in the pipeline. The data will not be user specific and therefore not adhere to any set permissions.
 
 # Pipeline
+
 The top layer of the query editor consists of the stages together forming the pipeline. These stages can be used in any quantity and order, but caution is advised for the sake of time-to-live of the widget. At the start of the pipeline the data will be passed down of the collection selected in the form. The data for the last stage will be passed down to the widget and can then be configured in the widget configuration. The last stage will always be limited to 100 items maximum to guarantee performance. The stages can have multiple different types:
 
 *	[`add field`](#add-field)
 *	[`array to object`](#array-to-object)
 *	[`bucket`](#bucket)
+*	[`bucket auto`](#bucket-auto)
 *	[`calculation`](#calculation)
 *	[`convert`](#convert)
 *	[`filters`](#filters)
@@ -23,7 +26,6 @@ The top layer of the query editor consists of the stages together forming the pi
 *	[`to Epoch`](#to-epoch)
 *	[`union with`](#union-with)
 *	[`unwind`](#unwind)
-
 
 
 A full example could be
@@ -59,15 +61,19 @@ A full example could be
 ```
 
 # Values
+
 If a value needs to be added to the query one may use the following types: string (text), number or value from a key. Text needs to be surrounded by double quotes and to select the value from a key the name needs to be proceeded by a $ sign. For example `"value": "$price"`.
 
 # Global Values
+
 At this time of writing there are several global variables that can be used in the query builder. `"$USER"` will be replaced with the id of the user in the database. This way you can make dashboards user-specific. `"$DEEP_DIVE"` provide access to the values of a chart when you click on this specific chart. the key will be replaced with the actual value. For exmaple if the chart contains information regarding an address and you want to use this key value use: `"$DEEP_DIVE.address"`. The last global varaible is the `"$ID"`, using this the id in the url will be extracted and replaced in the database with this value.
 
 
 
 # Stage types
-## Add field
+
+## [**Add field**](#pipeline)
+
 Adds new fields to object.
 
 
@@ -85,7 +91,8 @@ fields	| Object(Where the key is the new name and the value is value you want to
 }
 ```
 
-## Array to object
+## [**Array to object**](#pipeline)
+
 Converts an array into a single document;
 
 
@@ -103,17 +110,22 @@ fields	| Object(Where the key is the new name and the value is the old name)
 }
 ```
 
-## Bucket
+## [**Bucket**](#pipeline)
+
 Categorizes incoming documents into groups, called buckets, based on a specified expression and bucket boundaries and outputs a document per each bucket. Each output document contains an `_id` field whose value specifies the inclusive lower bound of the bucket. The output option specifies the fields included in each output document.
 
 Bucket only produces output documents for buckets that contain at least one input document.
 
 Name | Type | Description
 --- | --- | ---
-groupBy	| Text | An expression to group documents by
+groupBy	| Text | An expression to group documents by.
 boundaries	| Array | An array of values based on the groupBy expression that specify the boundaries for each bucket.
-default | Text | Optional. A literal that specifies the _id of an additional bucket that contains all documents whose groupBy expression result does not fall into a bucket specified by boundaries.
-output | Object | Optional. A document that specifies the fields to include in the output documents in addition to the `_id` field
+default | Text | Optional. A literal that specifies the `_id` of an additional bucket that contains all documents whose groupBy expression result does not fall into a bucket specified by boundaries.
+output | Object | Optional. A document that specifies the fields to include in the output documents in addition to the `_id` field.
+
+For example, a boundries array of `[ 0, 5, 10 ]` creates two buckets:
+- `[0, 5]` with inclusive lower bound `0` and exclusive upper bound `5`.
+- `[5, 10]` with inclusive lower bound `5` and exclusive upper bound `10`.
 
 ### Example:
 ```json
@@ -121,13 +133,9 @@ output | Object | Optional. A document that specifies the fields to include in t
   "groupBy" : "id",
   "boundaries" : [ 0, 5, 10 ],
   "default" : "remaining",
-  "output" : {
-      "count" : {
-          "$sum" : 1
-      },
-      "avg" : {
-          "$avg" : "$id"
-      }
+  "output": {
+    "count": { "$sum": 1 },
+    "avg": { "$avg": "$id" }
   },
   "type" : "bucket"
 }
@@ -138,29 +146,63 @@ output | Object | Optional. A document that specifies the fields to include in t
   "boundaries" : [ 0, 5, 10 ],
   "default" : "remaining",
   "output" : {
-      "count" : {
-          "$sum" : 1
-      },
-      "avg" : {
-          "$avg" : "$id"
-      },
-      "routers": {
-        "$addToSet": "$router"
-      },
-      "data": {
-          "$push": {
-            "method": {
-              "$concat": [ "$method", " ", "$path" ]
-            },
-            "status": "$status"
-          }
-        }
+    "count": { "$sum": 1 },
+    "avg": { "$avg": "$id" },
+    "routers": { "$addToSet": "$router"  },
+    "data": {
+      "$push": {
+        "method": {
+          "$concat": [ "$method", " ", "$path" ]
+        },
+        "status": "$status"
+      }
+    }
   },
   "type" : "bucket"
 }
 ```
 
-## Calculation
+## [**Bucket auto**](#pipeline)
+
+Categorizes incoming documents into a specific number of groups, called buckets, based on a specified expression. Bucket boundaries are automatically determined in an attempt to evenly distribute the documents into the specified number of buckets.
+
+Name | Type | Description
+--- | --- | ---
+groupBy	| Text | An expression to group documents by.
+buckets	| Number | A positive 32-bit integer that specifies the number of buckets into which input documents are grouped.
+output	| Object | Optional. A document that specifies the fields to include in the output documents in addition to the `_id` field.
+granularity	| Text | Optional. A string that specifies the [preferred number series](https://en.wikipedia.org/wiki/Preferred_number) to use to ensure that the calculated boundary edges end on preferred round numbers or their powers of 10.
+
+The suppported values of `granularity` are:
+* `"R5"`
+* `"R10"`
+* `"R20"`
+* `"R40"`
+* `"R80"`
+* `"1-2-5"`
+* `"E6"`
+* `"E12"`
+* `"E24"`
+* `"E48"`
+* `"E96"`
+* `"E192"`
+* `"POWERSOF2"`
+
+### Example:
+```json
+{
+  "groupBy": "id",
+  "buckets": 2,
+  "output": {
+    "count": { "$sum": 1 },
+    "avg": { "$avg": "$id" }
+  },
+  "granularity": "R80"
+}
+```
+
+## [**Calculation**](#pipeline)
+
 This stage has been created in order to be able to create new columns derived from existing columns. Usage could be appending text to text, doing basic calculations or creating categories for numerical records.
 
 The different types of calculations are:
@@ -237,7 +279,8 @@ Switch statement
 }
 ```
 
-## Convert
+## [**Convert**](#pipeline)
+
 Converts a value to a specified type.
 
 Name | Value
@@ -270,7 +313,8 @@ The 'to' argument can be any valid expression that resolves to one of the follow
 }
 ```
 
-## Filters
+## [**Filters**](#pipeline)
+
 The filters stage's intended purpose is to query the data and return all matching records. One can i.e. select only country specific data. There is support for AND statements and OR statements on multiple fields. Every expression needs to contain a `type` and `value`.
 
 Different types are:
@@ -368,8 +412,8 @@ Where region equals Nederland and price is greater than 1000 and less than the m
 }
 ```
 
+## [**Group**](#pipeline)
 
-## Group
 In order to create calculated values over multiple items the group stage exists. In this stage the group keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down.
 
 Name | Value
@@ -411,8 +455,8 @@ The possible options for the type of fields include:
 }
 ```
 
+## [**Kpis**](#pipeline)
 
-## Kpis
 In order to create calculated values over all the remaining records the kpis stage exists. In this stage the kpi keys must be declared. All keys not set here will not be passed down.
 
 Name | Value
@@ -447,7 +491,8 @@ The possible options for the type of fields include:
 }
 ```
 
-## Left join
+## [**Left join**](#pipeline)
+
 This type is intended for joining data from a collection within the same app. This would be used if the data necessary for a table is split up in 2 or more collections (i.e. employee and manager). Below are the possible options to pass to this stage.
 
 Name | Value
@@ -502,15 +547,16 @@ Returns:
 }]
 ```
 
+## [**Limit**](#pipeline)
 
-## Limit
 This type will limit the amount of items passed down to the next stage.
 
 Name | Value
 ---|---
 amount |	Number
 
-## Object to array
+## [**Object to array**](#pipeline)
+
 Converts a object to an array. The return array contains an element for each field/value pair in the original document.
 
 
@@ -528,8 +574,8 @@ fields	| Object(Where the key is the new name and the value is the old name)
 }
 ```
 
+## [**Order**](#pipeline)
 
-## Order
 The order stage allows you to order all passed items on multiple fields. The fields object stores two arrays that contain the sorting methods. Each array contains a list of keys that the query will sort on. For example, if the query only needs to sort ascending by ID, then the stage will look like this:
 
 ```json
@@ -558,8 +604,8 @@ fields	| Text (Object containing two arrays)
 ```
 
 
+## [**Rename**](#pipeline)
 
-## Rename
 This type is used for renaming the keys to pass to the next stage.
 
 Name | Value
@@ -578,8 +624,8 @@ fields	| Object(Where the key is the new name and the value is the old name)
 ```
 
 
+## [**Show**](#pipeline)
 
-## Show
 This type is used for selecting keys to pass to the next stage.
 
 Name | Value
@@ -596,8 +642,8 @@ columns	| Array (List containing names of the keys)
 ```
 
 
+## [**To Date**](#pipeline)
 
-## To Date
 Inverse of toEpoch. Converts an integer timestamp to a data string. Additionally accepts format specifiers to modify the output date string, if 'format' is not specified the stage default is "%Y-%m-%d" which outputs as "2022-06-15". You can also specify the timezone, if 'timezone' is not specified the stage default is "Europe/Amsterdam".
 
 Name | Value
@@ -634,7 +680,8 @@ Specifiers | Description | Possible Values
 }
 ```
 
-## To Epoch
+## [**To Epoch**](#pipeline)
+
 Converts key to epoch timestamp. This stage expects a datestring as input and returns epoch timestamp.
 
 Name | Value
@@ -649,7 +696,8 @@ column	| Text
 }
 ```
 
-## Union With
+## [**Union With**](#pipeline)
+
 Performs a union of two collections; i.e. 'union with' combines results from two collections into a single result set.
 
 
@@ -686,7 +734,8 @@ This could result in duplicates, to remove duplicates you can use the 'group' st
 
 ```
 
-## Unwind
+## [**Unwind**](#pipeline)
+
 Deconstructs an array field from the input documents to output a document for each element. Each output document is the input document with the value of the array field replaced by the element.
 
 
