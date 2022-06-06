@@ -515,7 +515,7 @@ right_key |	Text (key of the selected collection)
 }
 ```
 
-The "left join" stage also accepts "$USER_TABLE" as a collection value. When this identifier is used to system user replaces the specified left_key. The right_key must then specify whether the left_key is an ID (integer) or string For example, the following dataset:
+The "left join" step also accepts "$USER_TABLE" as a collection value. When this identifier is used the system replaces the specified left_key. The right_key must then specify whether the left_key is an ID (integer) or string. For example, the following dataset:
 ```json
 [{
   "location": "work",
