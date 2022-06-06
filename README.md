@@ -192,12 +192,13 @@ The suppported values of `granularity` are:
 ```json
 {
   "groupBy": "id",
-  "buckets": 2,
+  "buckets": 6,
   "output": {
     "count": { "$sum": 1 },
     "avg": { "$avg": "$id" }
   },
-  "granularity": "R80"
+  "granularity": "R80",
+  "type" : "bucketAuto"
 }
 ```
 
