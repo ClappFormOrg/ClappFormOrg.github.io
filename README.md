@@ -14,11 +14,12 @@ The top layer of the query editor consists of the stages together forming the pi
 *	[`calculation`](#calculation)
 *	[`convert`](#convert)
 *	[`filters`](#filters)
+*	[`first from array`](#first-from-array)
 *	[`group`](#group)
 *	[`kpis`](#kpis)
 *	[`left join`](#left-join)
 *	[`limit`](#limit)
-*	[`object to array`](#object-to-array)
+*	[`nested to string`](#nested-to-string)
 *	[`order`](#order)
 *	[`rename`](#rename)
 *	[`show`](#show)
@@ -412,6 +413,23 @@ Where region equals Nederland and price is greater than 1000 and less than the m
   "type": "filters"
 }
 ```
+## [**First from array**](#pipeline)
+Get first element from an array.
+
+Name | Value
+---|---
+fields	| Object(Where the key is the new name and the value is the old name)
+
+#### Example:
+
+```json
+{
+  "type": "firstFromArray",
+  "fields": {
+    "new": "old"
+  }
+}
+```
 
 ## [**Group**](#pipeline)
 
@@ -556,6 +574,7 @@ Name | Value
 ---|---
 amount |	Number
 
+
 ## [**Object to array**](#pipeline)
 
 Converts a object to an array. The return array contains an element for each field/value pair in the original document.
@@ -612,6 +631,7 @@ This type is used for renaming the keys to pass to the next stage.
 Name | Value
 --- | ---
 fields	| Object(Where the key is the new name and the value is the old name)
+check_for_arrays | Boolean (If renamed object is a array the elements will be concated to a single string)
 
 #### Example:
 
