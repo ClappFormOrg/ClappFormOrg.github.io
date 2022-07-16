@@ -16,6 +16,7 @@ The top layer of the query editor consists of the stages together forming the pi
 *	[`filters`](#filters)
 *	[`first from array`](#first-from-array)
 *	[`group`](#group)
+*	[`hide`](#hide)
 *	[`kpis`](#kpis)
 *	[`left join`](#left-join)
 *	[`limit`](#limit)
@@ -473,6 +474,21 @@ The possible options for the type of fields include:
   }
 }
 ```
+## [**Hide**](#pipeline)
+Removes/excludes fields from documents. (For the inverse, see [`show`](#show))
+
+Name | Value
+--- | ---
+columns	| Array (List containing names of the keys)
+
+#### Example:
+
+```json
+{
+  "type": "hide",
+  "fields": ["listing_photo_urls", "references", "postcode"]
+}
+```
 
 ## [**Kpis**](#pipeline)
 
@@ -647,7 +663,7 @@ check_for_arrays | Boolean (If renamed object is a array the elements will be co
 
 ## [**Show**](#pipeline)
 
-This type is used for selecting keys to pass to the next stage.
+This type is used for selecting keys to pass to the next stage. (For the inverse, see [`hide`](#hide))
 
 Name | Value
 --- | ---
@@ -658,7 +674,7 @@ columns	| Array (List containing names of the keys)
 ```json
 {
   "type": "show",
-  "columns": ["new_acceptance", "adress", "building_year", "house_price", "postcode"]
+  "fields": ["new_acceptance", "adress", "building_year", "house_price", "postcode"]
 }
 ```
 
@@ -692,11 +708,12 @@ Specifiers | Description | Possible Values
 %%	| Percent Character as a Literal | %
 
 #### Example:
+Format shown below ouputs as `2022-06-15 11:06:52`
 ```json
 {
   "type": "toDate",
   "column": "datestring",
-  "format": "%Y-%m-%d %H:%M:%S", // Outputs: 2022-06-15 11:06:52
+  "format": "%Y-%m-%d %H:%M:%S", 
   "timezone": "Europe/Amsterdam"
 }
 ```
