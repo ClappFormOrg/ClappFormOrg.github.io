@@ -1,4 +1,5 @@
 
+
 # Query
 
 The query editor is meant to create a pipeline that transforms data at the latest possible stage before presentation. This means it is intended for selecting only the data necessary for creating a widget. Some types have the query disabled as the widget doesn't need any input data. Only the developer needs rights to certain data in order to put it in the pipeline. The data will not be user specific and therefore not adhere to any set permissions.
@@ -20,7 +21,7 @@ The top layer of the query editor consists of the stages together forming the pi
 *	[`kpis`](#kpis)
 *	[`left join`](#left-join)
 *	[`limit`](#limit)
-*	[`nested to string`](#nested-to-string)
+*	[`object to array`](#object-to-array)
 *	[`order`](#order)
 *	[`rename`](#rename)
 *	[`show`](#show)
@@ -28,6 +29,7 @@ The top layer of the query editor consists of the stages together forming the pi
 *	[`to Epoch`](#to-epoch)
 *	[`union with`](#union-with)
 *	[`unwind`](#unwind)
+*	[`raw`](#raw)
 
 
 A full example could be
@@ -92,6 +94,17 @@ fields	| Object(Where the key is the new name and the value is value you want to
   }
 }
 ```
+
+The value field also accepts the following as input:
+
+Value | Descriptions
+---|---
+$GET_DATE_NOW	| Returns the current date as "%d-%m-%Y"/ "28-09-2022"
+$GET_DATE_SEC	| Returns the current time as seconds
+$GET_DATE_MIL	| Returns the current time as milliseconds ()
+$GET_DATE_MIC	| Returns the current time as microseconds ()
+$GET_DATE_NAN	| Returns the current time as nanoseconds
+
 
 ## [**Array to object**](#pipeline)
 
@@ -303,6 +316,7 @@ The 'to' argument can be any valid expression that resolves to one of the follow
 *	`int`
 *	`long`
 *	`decimal`
+*	`euro`
 
 #### Example:
 
@@ -415,11 +429,11 @@ Where region equals Nederland and price is greater than 1000 and less than the m
 }
 ```
 ## [**First from array**](#pipeline)
-Get first element from an array.
+Get first element from an array. Checks if the selected column is an array, if not then returns the complete array
 
 Name | Value
 ---|---
-fields	| Object(Where the key is the new name and the value is the old name)
+fields	| Object (Where the key is the new name for the array item and the value is the complete array column)
 
 #### Example:
 
@@ -427,18 +441,18 @@ fields	| Object(Where the key is the new name and the value is the old name)
 {
   "type": "firstFromArray",
   "fields": {
-    "new": "old"
+    "newKey": "sourceArray"
   }
 }
 ```
 
 ## [**Group**](#pipeline)
 
-In order to create calculated values over multiple items the group stage exists. In this stage the group keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down.
+In order to create calculated values over multiple items the group stage exists. In this stage the group keys must be declared together with the calculated keys it must retain. All keys not set here will not be passed down. Furthermore, the Group stage does not sort its results, the Order stage can be used to sort the results.
 
 Name | Value
 ---|---
-by | List (Keys that together need to form a new unique item, Optional)
+by | List (Keys that together need to form a new unique item)
 fields | Object
 
 The field needs to get a name, type of calutation and the column on which to perform the calculation.
@@ -551,26 +565,26 @@ right_key |	Text (key of the selected collection)
 
 The "left join" step also accepts "$USER_TABLE" as a collection value. When this identifier is used the system replaces the specified left_key. The right_key must then specify whether the left_key is an ID (integer) or string. For example, the following dataset:
 ```json
-[{
+{
   "location": "work",
   ...
   "user_id": 1,
   "user_email": "j.doe@clappform.com"
-}]
+}
 ```
 With this query:
 ```json
-[{
+{
   "type": "left join",
   "collection": "$USER_TABLE",
   "left_key": "user_id", // alt: "left_key": "user_email"
   "right_key": "id" // alt: "right_key": "email"
-}]
+}
 ```
 
 Returns:
 ```json
-[{
+{
   "location": "work",
   ...
   "user_id": {
@@ -579,7 +593,7 @@ Returns:
     "email": "j.doe@clappform.com"
   },
   "user_email": "j.doe@clappform.com"
-}]
+}
 ```
 
 ## [**Limit**](#pipeline)
@@ -612,7 +626,7 @@ fields	| Object(Where the key is the new name and the value is the old name)
 
 ## [**Order**](#pipeline)
 
-The order stage allows you to order all passed items on multiple fields. The fields object stores two arrays that contain the sorting methods. Each array contains a list of keys that the query will sort on. For example, if the query only needs to sort ascending by ID, then the stage will look like this:
+The order stage allows you to order all passed items on multiple fields. The fields object stores two arrays that contain the sorting methods. The order stage is limited to 30 keys. Each array contains a list of keys that the query will sort on. For example, if the query only needs to sort ascending by ID, then the stage will look like this:
 
 ```json
 {
@@ -646,8 +660,8 @@ This type is used for renaming the keys to pass to the next stage.
 
 Name | Value
 --- | ---
-fields	| Object(Where the key is the new name and the value is the old name)
-check_for_arrays | Boolean (If renamed object is a array the elements will be concated to a single string)
+fields	| Object (Where the key is the new name and the value is the old name)
+check_for_arrays | Boolean (If renamed object is a array the elements will be concated to a single string). Default: True. Optional
 
 #### Example:
 
@@ -742,12 +756,15 @@ Performs a union of two collections; i.e. 'union with' combines results from two
 Name | Value
 ---|---
 collection	| Text (Collection slug)
+pipeline| Array (Optional. An aggregation pipeline to apply to the specified collection)
 
 #### Example:
 ```json
 {
   "type": "unionWith",
-  "collection": "feedback_resultaten"
+  "collection": "feedback_resultaten",
+  "pipeline": [ { "$project": { "beschrijving": 1 } } ]
+
 }
 ```
 This could result in duplicates, to remove duplicates you can use the 'group' stage type.
@@ -789,6 +806,38 @@ fields	| Array (List containing names of the keys)
 }
 ```
 
+## [**Raw**](#pipeline)
+The raw stage provides a way to add more complex stages to the query if the currently available stages are not sufficient. The queries are performed on an [MongoDB](https://www.mongodb.com/docs/v6.0/) running version 6.0.1, all queries are added to the aggregation stage used to retrieve the data. We advise caution when using this stage as the queries proper knowledge on the workings of MongoDB queries.
+
+Name | Value
+---|---
+stages| Array (Contains all manually added stages)
+```json
+{
+   "type":"raw",
+   "stages":[
+      {
+         "$addFields":{
+            "ref_1.publication_date":{
+               "$cond":{
+                  "else":"$$REMOVE",
+                  "if":"ref_1: { $exists: true }",
+                  "then":{
+                     "$toDate":"$ref_1.publication_date"
+                  }
+               }
+            }
+         }
+      },
+      {
+        "$unwind": {
+          "path": "$buckets",
+          "preserveNullAndEmptyArrays": true
+        }
+      }
+   ]
+}
+```
 # Questionnaire
 To configure the relevant questionnaire for the user, you can write a query in order determine which data will be loaded in the questionnaire. If you don't confiugure a query please be aware it will always parse in data if the collection has data. Making a questionnaire user specific, or other condition use the query options in order to fulfill your goal.
 
