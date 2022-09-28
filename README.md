@@ -811,7 +811,8 @@ The raw stage provides a way to add more complex stages to the query if the curr
 
 Name | Value
 ---|---
-stages| Array (Contains all manually added stages)
+stages | Array (Contains all manually added stages)
+
 ```json
 {
    "type":"raw",
