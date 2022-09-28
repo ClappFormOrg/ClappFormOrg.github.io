@@ -23,13 +23,14 @@ The top layer of the query editor consists of the stages together forming the pi
 *	[`limit`](#limit)
 *	[`object to array`](#object-to-array)
 *	[`order`](#order)
+*	[`raw`](#raw)
 *	[`rename`](#rename)
 *	[`show`](#show)
 *	[`to Date`](#to-date)
 *	[`to Epoch`](#to-epoch)
 *	[`union with`](#union-with)
 *	[`unwind`](#unwind)
-*	[`raw`](#raw)
+
 
 
 A full example could be
@@ -70,9 +71,15 @@ If a value needs to be added to the query one may use the following types: strin
 
 # Global Values
 
-At this time of writing there are several global variables that can be used in the query builder. `"$USER"` will be replaced with the id of the user in the database. This way you can make dashboards user-specific. `"$DEEP_DIVE"` provide access to the values of a chart when you click on this specific chart. the key will be replaced with the actual value. For exmaple if the chart contains information regarding an address and you want to use this key value use: `"$DEEP_DIVE.address"`. The last global varaible is the `"$ID"`, using this the id in the url will be extracted and replaced in the database with this value.
+The following system variables are provided for use in expressions.
 
-
+Value| Description
+---|---
+`$USER` | ID of the currently active user. Used to make the dashboard user specific
+`$DEEP_DIVE` | Provides access to the values of a chart when clicking on a specific chart. For example, if the chart contains information regarding an address and you want to use this key value use: `"$DEEP_DIVE.address"`
+`$ID` | Refers to the identifier passed in the URL. Used in details pages to specify what item is currently being viewed. Both input and output are controlled by the settings of the sending widget and receiving page
+`$$NOW` | Returns current datatime value, this remains constant throughout the aggregation pipeline
+`$$REMOVE`  | Allows for conditional exclusion of fields
 
 # Stage types
 
@@ -99,11 +106,11 @@ The value field also accepts the following as input:
 
 Value | Descriptions
 ---|---
-$GET_DATE_NOW	| Returns the current date as "%d-%m-%Y"/ "28-09-2022"
-$GET_DATE_SEC	| Returns the current time as seconds
-$GET_DATE_MIL	| Returns the current time as milliseconds ()
-$GET_DATE_MIC	| Returns the current time as microseconds ()
-$GET_DATE_NAN	| Returns the current time as nanoseconds
+`$GET_DATE_NOW`	| Returns the current date as `"28-09-2022"` (String)
+`$GET_DATE_SEC`	| Returns the current time as seconds (Unsigned Int)
+`$GET_DATE_MIL`	| Returns the current time as milliseconds (Unsigned Long Long)
+`$GET_DATE_MIC`	| Returns the current time as microseconds (Unsigned Long Long)
+`$GET_DATE_NAN` | Returns the current time as nanoseconds (Unsigned Long Long)
 
 
 ## [**Array to object**](#pipeline)
@@ -244,7 +251,7 @@ The different types of calculations are:
 * `switch`
 
 ### Examples
-Single calculation (basic_calculation = $price * 2)
+Single calculation `(basic_calculation = $price * 2)`
 ```json
 {
   "type": "calculation",
@@ -256,7 +263,7 @@ Single calculation (basic_calculation = $price * 2)
 }
 ```
 
-Multilayered (multi_calculation = (price + abs(-10)) / 4)
+Multilayered `(multi_calculation = (price + abs(-10)) / 4)`
 ```json
 {
   "type": "calculation",
@@ -433,7 +440,7 @@ Get first element from an array. Checks if the selected column is an array, if n
 
 Name | Value
 ---|---
-fields	| Object (Where the key is the new name for the array item and the value is the complete array column)
+fields	| Object (The key is the new name for the array item and the value is the complete array column)
 
 #### Example:
 
@@ -493,7 +500,7 @@ Removes/excludes fields from documents. (For the inverse, see [`show`](#show))
 
 Name | Value
 --- | ---
-columns	| Array (List containing names of the keys)
+columns	| Array (List containing names of the keys to remove)
 
 #### Example:
 
@@ -653,6 +660,40 @@ fields	| Text (Object containing two arrays)
 }
 ```
 
+## [**Raw**](#pipeline)
+The raw stage provides a way to add more complex stages to the query if the currently available stages are not sufficient. The queries are performed on an [MongoDB](https://www.mongodb.com/docs/v6.0/) running version 6.0.1, all queries are added to the aggregation stage used to retrieve the data. We advise caution when using this stage as the queries proper knowledge on the workings of MongoDB queries.
+
+Name | Value
+---|---
+stages | Array (Contains all manually added stages)
+
+
+```json
+{
+   "type":"raw",
+   "stages":[
+      {
+         "$addFields":{
+            "ref_1.publication_date":{
+               "$cond":{
+                  "else":"$$REMOVE",
+                  "if":"ref_1: { $exists: true }",
+                  "then":{
+                     "$toDate":"$ref_1.publication_date"
+                  }
+               }
+            }
+         }
+      },
+      {
+        "$unwind": {
+          "path": "$buckets",
+          "preserveNullAndEmptyArrays": true
+        }
+      }
+   ]
+}
+```
 
 ## [**Rename**](#pipeline)
 
@@ -660,8 +701,8 @@ This type is used for renaming the keys to pass to the next stage.
 
 Name | Value
 --- | ---
-fields	| Object (Where the key is the new name and the value is the old name)
-check_for_arrays | Boolean (If renamed object is a array the elements will be concated to a single string). Default: True. Optional
+fields	| Object (The key is the new name and the value is the old name)
+check_for_arrays | Boolean (Optional. If renamed object is a array the elements will be concated to a single string). Default: True
 
 #### Example:
 
@@ -681,7 +722,7 @@ This type is used for selecting keys to pass to the next stage. (For the inverse
 
 Name | Value
 --- | ---
-columns	| Array (List containing names of the keys)
+columns	| Array (List containing names of the keys to keep)
 
 #### Example:
 
@@ -695,7 +736,7 @@ columns	| Array (List containing names of the keys)
 
 ## [**To Date**](#pipeline)
 
-Inverse of toEpoch. Converts an integer timestamp to a data string. Additionally accepts format specifiers to modify the output date string, if 'format' is not specified the stage default is "%Y-%m-%d" which outputs as "2022-06-15". You can also specify the timezone, if 'timezone' is not specified the stage default is "Europe/Amsterdam".
+Inverse of toEpoch. Converts an integer timestamp to a data string. Additionally accepts format specifiers to modify the output date string, if 'format' is not specified the stage default is `"%Y-%m-%d"` which outputs as `"2022-06-15"`. You can also specify the timezone, if 'timezone' is not specified the stage default is `"Europe/Amsterdam"`.
 
 Name | Value
 ---|---
@@ -806,65 +847,24 @@ fields	| Array (List containing names of the keys)
 }
 ```
 
-## [**Raw**](#pipeline)
-The raw stage provides a way to add more complex stages to the query if the currently available stages are not sufficient. The queries are performed on an [MongoDB](https://www.mongodb.com/docs/v6.0/) running version 6.0.1, all queries are added to the aggregation stage used to retrieve the data. We advise caution when using this stage as the queries proper knowledge on the workings of MongoDB queries.
-
-Name | Value
----|---
-stages | Array (Contains all manually added stages)
-
-```json
-{
-   "type":"raw",
-   "stages":[
-      {
-         "$addFields":{
-            "ref_1.publication_date":{
-               "$cond":{
-                  "else":"$$REMOVE",
-                  "if":"ref_1: { $exists: true }",
-                  "then":{
-                     "$toDate":"$ref_1.publication_date"
-                  }
-               }
-            }
-         }
-      },
-      {
-        "$unwind": {
-          "path": "$buckets",
-          "preserveNullAndEmptyArrays": true
-        }
-      }
-   ]
-}
-```
 # Questionnaire
-To configure the relevant questionnaire for the user, you can write a query in order determine which data will be loaded in the questionnaire. If you don't confiugure a query please be aware it will always parse in data if the collection has data. Making a questionnaire user specific, or other condition use the query options in order to fulfill your goal.
+To configure the relevant questionnaire for the user, you can write a query in order determine which data will be loaded in the questionnaire. If you don't configure a query please be aware it will always parse in data if the collection has data. Making a questionnaire user specific, or other condition use the query options in order to fulfill your goal.
 
 # Explanation
 In several places of the widget configuration you have the possibility to provide your own text using a WYSIWYG. It is possible to parse in data from the query into your text. In every case only the first item of the query result is accessible. Let's say you want to parse in the address in your text, you need to do the following:
 
 ## Example:
-{% highlight html%}
-{% raw %}
-{{templateData.key}}
-{% endraw %}
-{% endhighlight %}
+`{% highlight html%}`
+`{% raw %}`
+`{{templateData.key}}`
+`{% endraw %}`
+`{% endhighlight %}`
 
 It is also possible to parse in user data. The items which can be shown are:
  * `email`
  * `first_name` (Average/ median)
  * `last_name` (Minimum)
 
-You can use this data in the WYSIWYG:
-
-## Example:
-{% highlight html%}
-{% raw %}
-{{user.key}}
-{% endraw %}
-{% endhighlight %}
 
 # HTML (Data Table, Single Value, List)
 It is possible to customize the data table, single value widget and list overview. In order to accomplish this, you need to specify the HTML and CSS. The HTML follows the HTML and Vue JS directives. The css mist be specified by making a JSON setting. You need to configure both. If you want to use data from the query result it is possible. The data is stored inside an object. It can be accessed by using the data in your HTML
@@ -877,11 +877,12 @@ testeten
 ```
 
 ## Example:
-{% highlight html%}
-{% raw %}
-{{data.key}}
-{% endraw %}
-{% endhighlight %}
+`{% highlight html%}`
+`{% raw %}`
+`{{data.key}}`
+`{% endraw %}`
+`{% endhighlight %}`
+
 
 ## Example (CCS):
 ```json
