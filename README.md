@@ -496,11 +496,11 @@ The possible options for the type of fields include:
 }
 ```
 ## [**Hide**](#pipeline)
-Removes/excludes fields from documents. (For the inverse, see [`show`](#show))
+Removes/excludes fields from documents. (For the inverse, see [`show`](#show)) 
 
 Name | Value
 --- | ---
-columns	| Array (List containing names of the keys to remove)
+fields | Array (List containing names of the keys to remove)
 
 #### Example:
 
@@ -729,7 +729,7 @@ columns	| Array (List containing names of the keys to keep)
 ```json
 {
   "type": "show",
-  "fields": ["new_acceptance", "adress", "building_year", "house_price", "postcode"]
+  "fields": ["new_acceptance", "adress", "building_year"]
 }
 ```
 
@@ -797,7 +797,7 @@ Performs a union of two collections; i.e. 'union with' combines results from two
 Name | Value
 ---|---
 collection	| Text (Collection slug)
-pipeline| Array (Optional. An aggregation pipeline to apply to the specified collection)
+pipeline| Array (Optional. An aggregation pipeline to apply to the specified collection). All references to keys should include 'data.' as the data is not saved within the root, i.e. if the column is named 'firstname' the name is 'data.firstname'
 
 #### Example:
 ```json
